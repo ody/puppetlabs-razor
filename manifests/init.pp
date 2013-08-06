@@ -83,9 +83,12 @@ class razor (
     ensure => present,
   }
 
-  sudo::conf { 'razor':
-    priority => 10,
-    content  => "${username} ALL=(root) NOPASSWD: /bin/mount, /bin/umount\n",
+  sudo::rule { 'razor':
+    ensure   => present,
+    who      => 'razor',
+    commands => '/bin/mount /bin/umount',
+    nopass   => true,
+    comment  => 'So the razor user can mount ISOs for import',
   }
 
   if $source == 'package' {
@@ -130,7 +133,7 @@ class razor (
     require   => [
       Class['mongodb'],
       File[$directory],
-      Sudo::Conf['razor']
+      Sudo::Rule['razor']
     ],
     subscribe => [
       Class['razor::nodejs']

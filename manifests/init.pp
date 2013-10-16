@@ -17,34 +17,27 @@
 class razor (
   $servername = $fqdn,
   $libarchive = undef,
-  $tftp       = true
+  $tftp       = true,
 ) {
   # Ensure libarchive is installed -- the users requested custom version, or
   # our own guesswork as to what the version is on this platform.
   if $libarchive {
-    package { $libarchive: ensure => latest }
+    ensure_packages([$libarchive])
   } else {
     include razor::libarchive
   }
 
-  package { "unzip": ensure => latest }
-  package { "curl":  ensure => latest }
+  ensure_packages([ 'unzip', 'curl' ])
 
   # Install a JVM, since we need one
-  include 'java'
-  Class[java] -> Class[Razor::TorqueBox]
+  include java
+  Class['java'] -> Class['razor']
 
-  # Install our own TorqueBox bundle, quietly.  This isn't intended to be
-  # shared with anyone else, so we don't use a standard module.
-  include 'razor::torquebox'
-
-  # Once that is installed, we also need to install the server software.
-  include 'razor::server'
-  Class[Razor::Torquebox] -> Class[Razor::Server]
+  # Setup the razor-server application which will also install a copy of
+  # torquebox specificly for use by razor.
+  include razor::server
 
   if $tftp {
-    class { 'razor::tftp':
-      server => $servername
-    }
+    class { 'razor::tftp': razor_server => $servername }
   }
 }

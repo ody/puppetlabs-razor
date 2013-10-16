@@ -1,11 +1,5 @@
-class razor::tftp(
-  $server
-) {
+class razor::tftp($razor_server) {
   include ::tftp
-
-  ::tftp::file { "undionly.kpxe": }
-
-  ::tftp::file { "bootstrap.ipxe":
-    content => template('razor/bootstrap.ipxe.erb')
-  }
+  class { 'razor::tftp::files': razor_server=> $razor_server }
+  Class['::tftp'] -> Class['razor::tftp::files']
 }

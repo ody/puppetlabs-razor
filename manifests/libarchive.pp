@@ -7,7 +7,7 @@ class razor::libarchive {
     },
     "Debian" => $operatingsystemmajrelease ? {
       '6'     => 'libarchive1',
-      '7'     => 'libarchive12',
+      '7'     => 'libarchive-dev',
       default => 'libarchive13'
     },
     # We need the unversioned .so, which comes from the dev package on these
@@ -23,5 +23,5 @@ class razor::libarchive {
     fail("unable to autodetect libarchive package name for your platform")
   }
 
-  package { $libarchive_package: ensure => latest }
+  ensure_packages([$libarchive_package])
 }
